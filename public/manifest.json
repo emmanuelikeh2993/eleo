@@ -1,0 +1,24 @@
+{
+  "name": "ELEO Farm & Foods — Fresh Campus Eggs",
+  "short_name": "ELEO Eggs",
+  "description": "Fresh eggs delivered directly to campus hostels. Simple ordering, transparent tracking.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F9FAF8",
+  "theme_color": "#0F2F1D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

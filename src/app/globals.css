@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --farm-dark: #0F2F1D;
+    --farm-accent: #1B4329;
+    --farm-light: #F3F6F2;
+    --eggshell: #F9FAF8;
+    --ink: #1C201D;
+    --ink-muted: #5A635D;
+    --border-sage: #E2E8DF;
+    --amber-state: #B45309;
+    --emerald-state: #15803D;
+  }
+
+  body {
+    background-color: var(--eggshell);
+    color: var(--ink);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Accessible focus outlines */
+  :focus-visible {
+    outline: 2px solid var(--farm-dark);
+    outline-offset: 2px;
+  }
+
+  /* Safe tap target sizing */
+  button, input, select, textarea {
+    touch-action: manipulation;
+  }
+}
+
+/* Custom scrollbars for clean dockets */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D8CE;
+  border-radius: 9999px;
+}
