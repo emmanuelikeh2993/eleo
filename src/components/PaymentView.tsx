@@ -3,7 +3,16 @@
 import React, { useState } from 'react';
 import { Order } from '@/types';
 import { useStore } from '@/lib/store';
-import { Copy, Check, ArrowRight, AlertCircle, Building2 } from 'lucide-react';
+import {
+  Copy,
+  Check,
+  AlertCircle,
+  Building2,
+  MessageCircle,
+  CheckCircle2,
+  ShieldCheck,
+  ArrowRight,
+} from 'lucide-react';
 
 interface PaymentViewProps {
   order: Order;
@@ -14,6 +23,7 @@ export function PaymentView({ order, onPaymentConfirmedByStudent }: PaymentViewP
   const { settings, markPaymentSubmitted } = useStore();
   const [copiedAcc, setCopiedAcc] = useState(false);
   const [copiedRef, setCopiedRef] = useState(false);
+  const [senderAccountName, setSenderAccountName] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const formatNgn = (amt: number) =>
@@ -44,117 +54,161 @@ export function PaymentView({ order, onPaymentConfirmedByStudent }: PaymentViewP
     }, 600);
   };
 
+  // WhatsApp verification message pre-fill
+  const senderInfo = senderAccountName.trim() ? ` (Transferred from: ${senderAccountName.trim()})` : '';
+  const whatsappMsg = encodeURIComponent(
+    `Hello Olamide, I have made a bank transfer of ${formatNgn(order.total)} for Order ${order.order_number} to ${order.delivery_location}${senderInfo}. Please verify my payment.`
+  );
+  const whatsappUrl = `https://wa.me/${settings.support_whatsapp}?text=${whatsappMsg}`;
+
   return (
-    <div className="max-w-md mx-auto p-4 space-y-4">
-      {/* Banner */}
-      <div className="bg-[#FEF3C7] border border-[#FDE68A] p-4 rounded-xl text-[#92400E]">
-        <div className="flex items-start gap-2.5">
+    <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
+      {/* Top Banner */}
+      <div className="bg-[#FEF3C7] border border-[#FDE68A] p-4 sm:p-5 rounded-2xl text-[#92400E]">
+        <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 shrink-0 text-[#B45309] mt-0.5" />
           <div>
-            <h2 className="font-bold text-sm text-[#78350F]">
+            <h2 className="font-extrabold text-sm sm:text-base text-[#78350F]">
               Bank Transfer Payment Required
             </h2>
-            <p className="text-xs text-[#92400E] mt-0.5 leading-relaxed">
-              Please transfer the exact total below to the ELEO farm bank account using your order number as payment narration.
+            <p className="text-xs text-[#92400E] mt-1 leading-relaxed">
+              Please transfer the exact total below to the verified ELEO farm Access Bank account. Include your order reference number in the transfer narration for instant automated reconciliation.
             </p>
           </div>
         </div>
       </div>
 
       {/* Amount Callout Card */}
-      <div className="bg-white border border-[#E2E8DF] rounded-xl p-5 text-center shadow-xs">
-        <span className="text-xs font-semibold text-[#5A635D] block mb-1">
+      <div className="bg-white border border-[#E2E8DF] rounded-2xl p-6 text-center shadow-xs space-y-2">
+        <span className="text-xs font-bold text-[#5A635D] block uppercase tracking-wider">
           Total Amount to Transfer
         </span>
-        <div className="text-3xl font-extrabold text-[#0F2F1D] tracking-tight">
+        <div className="text-3xl sm:text-4xl font-black text-[#0F2F1D] tracking-tight">
           {formatNgn(order.total)}
         </div>
-        <div className="inline-flex items-center gap-1.5 mt-2 bg-[#F3F6F2] px-3 py-1 rounded-full text-xs font-medium text-[#0F2F1D]">
-          <span>Order Reference:</span>
-          <strong className="font-bold text-[#1C201D]">{order.order_number}</strong>
+        <div className="inline-flex items-center gap-2 mt-2 bg-[#F3F6F2] px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#0F2F1D] border border-[#D5E4D8]">
+          <span>Payment Reference:</span>
+          <strong className="font-mono font-bold text-[#1C201D] text-sm">
+            {order.order_number}
+          </strong>
           <button
             onClick={handleCopyRef}
-            className="ml-1 p-0.5 hover:text-[#15803D]"
-            title="Copy Order Number"
+            className="p-1 hover:text-[#15803D] transition-colors"
+            title="Copy Order Reference"
           >
-            {copiedRef ? <Check className="w-3.5 h-3.5 text-[#15803D]" /> : <Copy className="w-3.5 h-3.5" />}
+            {copiedRef ? (
+              <span className="flex items-center gap-1 text-[11px] text-[#15803D] font-bold">
+                <Check className="w-3.5 h-3.5" /> Copied
+              </span>
+            ) : (
+              <Copy className="w-3.5 h-3.5" />
+            )}
           </button>
         </div>
       </div>
 
-      {/* Bank Account Details Card */}
-      <div className="bg-white border border-[#E2E8DF] rounded-xl p-5 space-y-3.5 shadow-xs">
-        <div className="flex items-center gap-2 pb-3 border-b border-[#F0F4EF]">
-          <Building2 className="w-4 h-4 text-[#0F2F1D]" />
-          <h3 className="font-bold text-xs uppercase tracking-wider text-[#1C201D]">
-            Receiving Bank Account
-          </h3>
+      {/* Receiving Bank Account Details Card */}
+      <div className="bg-white border-2 border-[#CBD5C8] rounded-2xl p-6 sm:p-7 space-y-4 shadow-sm">
+        <div className="flex items-center justify-between pb-3 border-b border-[#F0F4EF]">
+          <div className="flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-[#0F2F1D]" />
+            <h3 className="font-extrabold text-sm uppercase tracking-wider text-[#1C201D]">
+              Receiving Bank Account
+            </h3>
+          </div>
+          <span className="text-[10px] font-bold bg-[#004B87] text-white px-2 py-0.5 rounded-md uppercase">
+            Access Bank Verified
+          </span>
         </div>
 
-        <div className="space-y-3 text-xs">
-          <div className="flex justify-between items-center">
-            <span className="text-[#5A635D]">Bank Name</span>
-            <span className="font-bold text-[#1C201D] text-sm">
+        <div className="space-y-3.5 text-xs sm:text-sm">
+          <div className="flex justify-between items-center py-1">
+            <span className="text-[#5A635D] font-medium">Bank Name</span>
+            <span className="font-extrabold text-[#1C201D] text-sm sm:text-base">
               {settings.bank_details.bank_name}
             </span>
           </div>
 
-          <div className="flex justify-between items-center">
-            <span className="text-[#5A635D]">Account Name</span>
-            <span className="font-semibold text-[#1C201D]">
+          <div className="flex justify-between items-center py-1">
+            <span className="text-[#5A635D] font-medium">Account Name</span>
+            <span className="font-extrabold text-[#1C201D]">
               {settings.bank_details.account_name}
             </span>
           </div>
 
-          <div className="flex justify-between items-center bg-[#F9FAF8] p-3 rounded-lg border border-[#E2E8DF]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F9FAF8] p-4 rounded-xl border border-[#D5DDD2]">
             <div>
-              <span className="text-[10px] text-[#5A635D] uppercase tracking-wider block">
-                Account Number
+              <span className="text-[10px] text-[#5A635D] uppercase tracking-wider block font-bold">
+                Account Number (NUBAN)
               </span>
-              <span className="font-mono font-bold text-lg text-[#0F2F1D] tracking-wider block">
+              <span className="font-mono font-black text-xl sm:text-2xl text-[#0F2F1D] tracking-wider block mt-0.5">
                 {settings.bank_details.account_number}
               </span>
             </div>
 
             <button
               onClick={handleCopyAcc}
-              className="px-3 py-1.5 bg-[#0F2F1D] text-white rounded-md text-xs font-semibold flex items-center gap-1 hover:bg-[#1B4329] transition-colors"
+              className="h-10 px-4 bg-[#0F2F1D] hover:bg-[#1B4329] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
             >
               {copiedAcc ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-[#86EFAC]" />
-                  <span>Copied</span>
+                  <Check className="w-4 h-4 text-[#86EFAC]" />
+                  <span>Copied to Clipboard!</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>Copy</span>
+                  <Copy className="w-4 h-4" />
+                  <span>Copy Account Number</span>
                 </>
               )}
             </button>
           </div>
+        </div>
 
-          <div className="bg-[#F3F6F2] p-3 rounded-lg border border-[#D5E4D8] text-[11px] text-[#0F2F1D] leading-relaxed">
-            <strong>Important:</strong> Put <code className="bg-white px-1.5 py-0.5 rounded font-bold text-[#78350F]">{order.order_number}</code> in the transfer remark so our operations administrator can verify your transfer immediately.
-          </div>
+        {/* Sender Name Assist for 3-Second Reconciliation */}
+        <div className="pt-2">
+          <label className="text-xs font-bold text-[#1C201D] block mb-1">
+            Sender Bank Account Name (Optional, for instant alert matching):
+          </label>
+          <input
+            type="text"
+            value={senderAccountName}
+            onChange={(e) => setSenderAccountName(e.target.value)}
+            placeholder="e.g. David Adeleke (or name on debit alert)"
+            className="w-full h-10 px-3.5 border border-[#D5DDD2] rounded-xl text-xs text-[#1C201D] placeholder-[#9CA3AF] focus:border-[#0F2F1D] focus:ring-1 focus:ring-[#0F2F1D] outline-hidden bg-[#F9FAF8]"
+          />
+          <span className="text-[10px] text-[#5A635D] mt-1 block">
+            Helps Olamide confirm your payment immediately even if your bank strips the narration.
+          </span>
         </div>
       </div>
 
-      {/* Primary Action Button */}
-      <div className="pt-2">
+      {/* Action Buttons */}
+      <div className="space-y-3">
         <button
           onClick={handleMadePayment}
           disabled={isProcessing}
-          className="w-full h-12 bg-[#0F2F1D] hover:bg-[#1B4329] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-98"
+          className="w-full h-13 bg-[#15803D] hover:bg-[#166534] text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-98"
         >
-          <span>
-            {isProcessing ? 'Verifying Submission...' : "I've Made Payment"}
-          </span>
-          <ArrowRight className="w-4 h-4" />
+          {isProcessing ? (
+            <span>Confirming Order...</span>
+          ) : (
+            <>
+              <CheckCircle2 className="w-5 h-5 text-[#86EFAC]" />
+              <span>I Have Made This Transfer (Generate Docket)</span>
+            </>
+          )}
         </button>
-        <p className="text-[11px] text-[#5A635D] text-center mt-2.5">
-          Tapping above updates your order status to pending verification and routes you to the live tracking docket.
-        </p>
+
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full h-11 bg-white hover:bg-[#F3F6F2] border border-[#CBD5C8] text-[#1C201D] font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs"
+        >
+          <MessageCircle className="w-4 h-4 text-[#25D366] fill-[#25D366]" />
+          <span>Send Debit Receipt / Alert on WhatsApp</span>
+        </a>
       </div>
     </div>
   );

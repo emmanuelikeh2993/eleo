@@ -29,6 +29,14 @@ export function CheckoutModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  React.useEffect(() => {
+    if (userProfile.name) setName(userProfile.name);
+    if (userProfile.phone) setPhone(userProfile.phone);
+    if (userProfile.hostel) setHostel(userProfile.hostel);
+    if (userProfile.room) setRoom(userProfile.room);
+    if (userProfile.goal) setGoal(userProfile.goal);
+  }, [userProfile]);
+
   if (!isOpen) return null;
 
   const subtotal = cart.reduce(
@@ -94,7 +102,7 @@ export function CheckoutModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-md rounded-xl shadow-2xl border border-[#E2E8DF] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-[#E2E8DF] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="p-4 bg-[#0F2F1D] text-white flex items-center justify-between">
           <div>

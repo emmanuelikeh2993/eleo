@@ -56,12 +56,12 @@ export function NutritionView() {
   ];
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-4">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="bg-white border border-[#E2E8DF] p-4 rounded-xl shadow-xs">
+      <div className="bg-white border border-[#E2E8DF] p-6 rounded-2xl shadow-xs">
         <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="w-4 h-4 text-[#F59E0B]" />
-          <h2 className="font-bold text-sm text-[#1C201D]">
+          <Sparkles className="w-5 h-5 text-[#F59E0B]" />
+          <h2 className="font-extrabold text-lg text-[#1C201D]">
             Student Nutrition & Goals
           </h2>
         </div>
@@ -71,7 +71,7 @@ export function NutritionView() {
       </div>
 
       {/* Goal Cards */}
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {goals.map((goal) => {
           const Icon = goal.icon;
           return (

@@ -29,9 +29,9 @@ CREATE TABLE IF NOT EXISTS app_settings (
 INSERT INTO app_settings (key, value)
 VALUES
     ('bank_details', '{
-        "bank_name": "Zenith Bank",
-        "account_name": "ELEO FARM & FOODS LTD",
-        "account_number": "1012345678",
+        "bank_name": "Access Bank",
+        "account_name": "Olowo Olamide Emmanuel",
+        "account_number": "1431041473",
         "instructions": "Use your Order Number as your bank transfer remark/narration."
     }'::jsonb),
     ('delivery_fee', '{

@@ -117,14 +117,14 @@ export function AdminDashboard() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-5">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Top Banner & Control Bar */}
-      <div className="bg-[#0F2F1D] text-white p-4 rounded-xl flex items-center justify-between shadow-xs">
+      <div className="bg-[#0F2F1D] text-white p-5 rounded-2xl flex items-center justify-between shadow-xs">
         <div>
           <span className="text-[10px] font-bold text-[#A5C4AF] tracking-widest uppercase block">
             Farm Operations Console
           </span>
-          <h1 className="font-extrabold text-base">ELEO Admin Dashboard</h1>
+          <h1 className="font-extrabold text-lg">ELEO Admin Dashboard</h1>
         </div>
 
         <button
@@ -132,14 +132,14 @@ export function AdminDashboard() {
             setIsAdmin(false);
             setActiveTab('store');
           }}
-          className="text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg border border-white/20 transition-colors"
+          className="text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3.5 py-2 rounded-xl border border-white/20 transition-colors"
         >
           Back to Store
         </button>
       </div>
 
-      {/* 6 Key Operational Metrics (PDF Section 3) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+      {/* 6 Key Operational Metrics */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div className="bg-white p-3.5 rounded-xl border border-[#E2E8DF] shadow-2xs">
           <div className="flex items-center justify-between text-[#5A635D] text-xs">
             <span>Today&apos;s Orders</span>

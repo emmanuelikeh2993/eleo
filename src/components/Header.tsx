@@ -3,7 +3,17 @@
 import React from 'react';
 import Image from 'next/image';
 import { useStore } from '@/lib/store';
-import { ShoppingBag, User, ShieldCheck, Egg, Sparkles, LogIn, LogOut, Home } from 'lucide-react';
+import {
+  ShoppingBag,
+  User,
+  Egg,
+  Package,
+  Target,
+  LogIn,
+  LogOut,
+  Home,
+  CheckCircle2,
+} from 'lucide-react';
 
 interface HeaderProps {
   onOpenCart: () => void;
@@ -14,7 +24,6 @@ export function Header({ onOpenCart }: HeaderProps) {
     cart,
     activeTab,
     setActiveTab,
-    isAdmin,
     currentUser,
     logout,
     openAuthModal,
@@ -26,165 +35,225 @@ export function Header({ onOpenCart }: HeaderProps) {
     (o) => o.order_status !== 'completed' && o.order_status !== 'cancelled'
   ).length;
 
+  const handleNavClick = (tab: 'landing' | 'store' | 'track' | 'history' | 'nutrition') => {
+    // If user is trying to access personal order history or active track without logging in
+    if ((tab === 'track' || tab === 'history') && !currentUser) {
+      openAuthModal(tab === 'track' ? 'orders' : 'profile');
+      return;
+    }
+    setActiveTab(tab);
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-[#0F2F1D] text-white border-b border-[#1B4329] px-4 py-3 shadow-xs">
-      <div className="max-w-md mx-auto flex items-center justify-between">
-        {/* Brand identity */}
-        <button
-          onClick={() => setActiveTab('landing')}
-          className="flex items-center gap-2.5 text-left focus:outline-hidden"
-        >
-          <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 p-0.5 shrink-0 border border-white/20">
-            <Image
-              src="/logo.jpg"
-              alt="ELEO Logo"
-              width={32}
-              height={32}
-              className="w-full h-full object-cover rounded-full"
-            />
-          </div>
-          <div>
-            <span className="font-bold tracking-tight text-base leading-none block">ELEO</span>
-            <span className="text-[11px] text-[#A5C4AF] font-medium tracking-wide">Campus Egg Hub</span>
-          </div>
-        </button>
-
-        {/* Right navigation triggers */}
-        <div className="flex items-center gap-2">
-          {/* User state / Auth Trigger */}
-          {currentUser ? (
-            <div className="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-full text-xs text-[#D8E6DC]">
-              <span className="font-medium truncate max-w-[90px]">{currentUser.name.split(' ')[0]}</span>
-              <button
-                onClick={logout}
-                title="Sign out"
-                className="text-white/60 hover:text-white p-0.5"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => openAuthModal('order')}
-              className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20 text-[#D8E6DC] flex items-center gap-1 transition-colors"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Sign In</span>
-            </button>
-          )}
-
-          {/* Admin Switcher */}
+    <header className="sticky top-0 z-40 bg-[#0F2F1D] text-white border-b border-[#1B4329] shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="flex items-center justify-between">
+          {/* Brand Identity */}
           <button
-            onClick={() => {
-              if (isAdmin) {
-                logout();
-              } else {
-                openAuthModal('admin');
-              }
-            }}
-            title={isAdmin ? 'Exit Admin View' : 'Admin Operations Login'}
-            className={`p-1.5 rounded-lg text-xs font-medium flex items-center transition-colors ${
-              isAdmin
-                ? 'bg-[#15803D] text-white'
-                : 'text-[#D8E6DC] hover:bg-white/10'
-            }`}
+            onClick={() => setActiveTab('landing')}
+            className="flex items-center gap-3 text-left focus:outline-hidden group"
           >
-            <ShieldCheck className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl overflow-hidden bg-white/10 p-0.5 shrink-0 border border-white/20 group-hover:border-white/40 transition-colors">
+              <Image
+                src="/logo.jpg"
+                alt="ELEO Logo"
+                width={36}
+                height={36}
+                className="w-full h-full object-cover rounded-lg"
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold tracking-tight text-lg leading-none block">
+                  ELEO
+                </span>
+                <span className="text-[10px] font-bold bg-[#15803D] text-[#DCFCE7] px-1.5 py-0.5 rounded-sm uppercase tracking-wider">
+                  Campus
+                </span>
+              </div>
+              <span className="text-[11px] text-[#A5C4AF] font-medium tracking-wide">
+                Fresh Egg Hub
+              </span>
+            </div>
           </button>
 
-          {/* Cart trigger */}
-          {!isAdmin && (
+          {/* Desktop Navigation Links (hidden on mobile, visible md+) */}
+          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+            <button
+              onClick={() => handleNavClick('landing')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeTab === 'landing'
+                  ? 'bg-white/15 text-white shadow-xs'
+                  : 'text-[#C2D8C9] hover:text-white hover:bg-white/5'
+              }`}
+            >
+              Home
+            </button>
+            <button
+              onClick={() => handleNavClick('store')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                activeTab === 'store'
+                  ? 'bg-white/15 text-white shadow-xs'
+                  : 'text-[#C2D8C9] hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Egg className="w-3.5 h-3.5 text-[#86EFAC]" />
+              <span>Order Eggs</span>
+            </button>
+            <button
+              onClick={() => handleNavClick('track')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                activeTab === 'track'
+                  ? 'bg-white/15 text-white shadow-xs'
+                  : 'text-[#C2D8C9] hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Package className="w-3.5 h-3.5" />
+              <span>Track Docket</span>
+              {pendingOrdersCount > 0 && (
+                <span className="w-2 h-2 rounded-full bg-[#F59E0B] animate-pulse" />
+              )}
+            </button>
+            <button
+              onClick={() => handleNavClick('history')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                activeTab === 'history'
+                  ? 'bg-white/15 text-white shadow-xs'
+                  : 'text-[#C2D8C9] hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>My Orders</span>
+            </button>
+            <button
+              onClick={() => handleNavClick('nutrition')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                activeTab === 'nutrition'
+                  ? 'bg-white/15 text-white shadow-xs'
+                  : 'text-[#C2D8C9] hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Target className="w-3.5 h-3.5" />
+              <span>Protein Goals</span>
+            </button>
+          </nav>
+
+          {/* Right Action Bar: Auth State & Cart */}
+          <div className="flex items-center gap-3">
+            {/* User Auth State */}
+            {currentUser ? (
+              <div className="flex items-center gap-2 bg-white/10 pl-2.5 pr-1.5 py-1 rounded-full border border-white/15">
+                <div className="text-left text-xs leading-tight">
+                  <span className="font-bold text-white block truncate max-w-[110px] sm:max-w-[140px]">
+                    {currentUser.name}
+                  </span>
+                  <span className="text-[10px] text-[#A5C4AF] block truncate max-w-[110px] sm:max-w-[140px]">
+                    {currentUser.hostel ? `${currentUser.hostel}, Rm ${currentUser.room}` : 'Verified Student'}
+                  </span>
+                </div>
+                <button
+                  onClick={logout}
+                  title="Sign out of student account"
+                  className="px-2 py-1 rounded-full text-[11px] font-semibold bg-[#DC2626]/80 hover:bg-[#DC2626] text-white flex items-center gap-1 transition-colors"
+                >
+                  <LogOut className="w-3 h-3" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => openAuthModal('order')}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 transition-colors border border-white/20"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-[#86EFAC]" />
+                  <span>Sign In</span>
+                </button>
+                <button
+                  onClick={() => openAuthModal('order')}
+                  className="hidden sm:flex px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#15803D] hover:bg-[#166534] text-white items-center gap-1.5 transition-colors shadow-sm"
+                >
+                  <span>Register</span>
+                </button>
+              </div>
+            )}
+
+            {/* Cart Trigger */}
             <button
               onClick={onOpenCart}
-              className="relative p-1.5 rounded-full hover:bg-white/10 text-white transition-colors focus:ring-2 focus:ring-white/40"
+              className="relative p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all focus:ring-2 focus:ring-white/40 flex items-center gap-2 border border-white/15"
               aria-label="View shopping cart"
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="w-4 h-4 text-[#86EFAC]" />
+              <span className="hidden sm:inline text-xs font-bold">Cart</span>
               {totalCartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-[#B45309] text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-[#0F2F1D]">
+                <span className="bg-[#B45309] text-white font-extrabold text-[11px] min-w-5 h-5 px-1 rounded-full flex items-center justify-center border border-[#0F2F1D]">
                   {totalCartCount}
                 </span>
               )}
             </button>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* Primary Sub-navigation Tabs */}
-      {!isAdmin && (
-        <nav className="max-w-md mx-auto flex items-center justify-between border-t border-[#1B4329]/80 mt-2.5 pt-2 text-xs font-medium text-[#C2D8C9]">
+        {/* Mobile Navigation Row (visible on mobile screens only) */}
+        <nav className="md:hidden flex items-center justify-between border-t border-[#1B4329] mt-3 pt-2 text-xs font-medium text-[#C2D8C9] overflow-x-auto gap-2">
           <button
-            onClick={() => setActiveTab('landing')}
-            className={`flex items-center gap-1 pb-1 transition-colors ${
+            onClick={() => handleNavClick('landing')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-md shrink-0 transition-colors ${
               activeTab === 'landing'
-                ? 'text-white border-b-2 border-[#A5C4AF] font-semibold'
-                : 'hover:text-white'
+                ? 'bg-white/15 text-white font-bold'
+                : 'text-[#C2D8C9] hover:text-white'
             }`}
           >
             <Home className="w-3.5 h-3.5" />
             <span>Home</span>
           </button>
-
           <button
-            onClick={() => {
-              if (!currentUser) openAuthModal('order');
-              else setActiveTab('store');
-            }}
-            className={`flex items-center gap-1 pb-1 transition-colors ${
+            onClick={() => handleNavClick('store')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-md shrink-0 transition-colors ${
               activeTab === 'store'
-                ? 'text-white border-b-2 border-[#A5C4AF] font-semibold'
-                : 'hover:text-white'
+                ? 'bg-white/15 text-white font-bold'
+                : 'text-[#C2D8C9] hover:text-white'
             }`}
           >
-            <Egg className="w-3.5 h-3.5" />
-            <span>Order Eggs</span>
+            <Egg className="w-3.5 h-3.5 text-[#86EFAC]" />
+            <span>Order</span>
           </button>
-
           <button
-            onClick={() => {
-              if (!currentUser) openAuthModal('orders');
-              else setActiveTab('track');
-            }}
-            className={`flex items-center gap-1 pb-1 relative transition-colors ${
+            onClick={() => handleNavClick('track')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-md shrink-0 transition-colors ${
               activeTab === 'track'
-                ? 'text-white border-b-2 border-[#A5C4AF] font-semibold'
-                : 'hover:text-white'
+                ? 'bg-white/15 text-white font-bold'
+                : 'text-[#C2D8C9] hover:text-white'
             }`}
           >
-            <span>Live Tracker</span>
-            {pendingOrdersCount > 0 && (
-              <span className="w-2 h-2 rounded-full bg-[#B45309] animate-pulse" />
-            )}
+            <Package className="w-3.5 h-3.5" />
+            <span>Track</span>
           </button>
-
           <button
-            onClick={() => setActiveTab('nutrition')}
-            className={`flex items-center gap-1 pb-1 transition-colors ${
-              activeTab === 'nutrition'
-                ? 'text-white border-b-2 border-[#A5C4AF] font-semibold'
-                : 'hover:text-white'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#F59E0B]" />
-            <span>Goals</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (!currentUser) openAuthModal('profile');
-              else setActiveTab('history');
-            }}
-            className={`flex items-center gap-1 pb-1 transition-colors ${
+            onClick={() => handleNavClick('history')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-md shrink-0 transition-colors ${
               activeTab === 'history'
-                ? 'text-white border-b-2 border-[#A5C4AF] font-semibold'
-                : 'hover:text-white'
+                ? 'bg-white/15 text-white font-bold'
+                : 'text-[#C2D8C9] hover:text-white'
             }`}
           >
             <User className="w-3.5 h-3.5" />
             <span>Profile</span>
           </button>
+          <button
+            onClick={() => handleNavClick('nutrition')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-md shrink-0 transition-colors ${
+              activeTab === 'nutrition'
+                ? 'bg-white/15 text-white font-bold'
+                : 'text-[#C2D8C9] hover:text-white'
+            }`}
+          >
+            <Target className="w-3.5 h-3.5" />
+            <span>Goals</span>
+          </button>
         </nav>
-      )}
+      </div>
     </header>
   );
 }

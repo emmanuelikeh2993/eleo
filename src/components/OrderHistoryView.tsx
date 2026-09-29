@@ -56,7 +56,7 @@ export function OrderHistoryView({ onSelectOrder }: OrderHistoryViewProps) {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-5">
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Student Profile Card */}
       <div className="bg-white border border-[#E2E8DF] rounded-xl p-4 shadow-xs">
         <div className="flex items-center justify-between pb-3 border-b border-[#F0F4EF]">

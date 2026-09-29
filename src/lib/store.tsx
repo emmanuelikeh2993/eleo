@@ -65,9 +65,9 @@ export const INITIAL_PRODUCTS: Product[] = [
 
 export const INITIAL_SETTINGS: AppSettings = {
   bank_details: {
-    bank_name: 'Zenith Bank',
-    account_name: 'ELEO FARM & FOODS LTD',
-    account_number: '1012345678',
+    bank_name: 'Access Bank',
+    account_name: 'Olowo Olamide Emmanuel',
+    account_number: '1431041473',
     instructions: 'Include your Order Number in your transfer narration for instant verification.',
   },
   delivery_fee: 300,
