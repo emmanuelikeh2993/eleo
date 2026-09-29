@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { Header } from '@/components/Header';
-import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { ActiveOrderBanner } from '@/components/ActiveOrderBanner';
 import { LandingPage } from '@/components/LandingPage';
 import { AuthModal } from '@/components/AuthModal';
@@ -45,6 +44,17 @@ export default function HomePage() {
   const [selectedDocketOrder, setSelectedDocketOrder] = useState<Order | null>(null);
   const [productCategoryFilter, setProductCategoryFilter] = useState<'all' | 'standard' | 'jumbo' | 'bundle'>('all');
 
+  // Enforce auth-gated view:
+  // - When logged in, never show the landing page (direct to store/active dashboard)
+  // - When logged out (guest), only show the landing page
+  useEffect(() => {
+    if (currentUser && activeTab === 'landing') {
+      setActiveTab('store');
+    } else if (!currentUser && activeTab !== 'landing') {
+      setActiveTab('landing');
+    }
+  }, [currentUser, activeTab, setActiveTab]);
+
   // Filtered products
   const filteredProducts = products.filter((p) => {
     if (productCategoryFilter === 'all') return true;
@@ -78,9 +88,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F9FAF8] text-[#1C201D] selection:bg-[#DCFCE7] selection:text-[#0F2F1D]">
-      {/* PWA Install Notification */}
-      <PwaInstallBanner />
-
       {/* Global Responsive Header */}
       <Header onOpenCart={() => setIsCartOpen(true)} />
 

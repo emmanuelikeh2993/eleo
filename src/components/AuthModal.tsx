@@ -32,7 +32,33 @@ export function AuthModal() {
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Clear all form fields completely to protect privacy
+  const resetAllFields = () => {
+    setPhone('');
+    setPin('');
+    setRegName('');
+    setRegPhone('');
+    setRegHostel('');
+    setRegRoom('');
+    setRegPin('');
+    setRegGoal('muscle');
+    setErrorMsg('');
+  };
+
+  // Whenever modal opens or closes, always present fresh blank fields
+  React.useEffect(() => {
+    if (isAuthModalOpen) {
+      resetAllFields();
+      setErrorMsg('');
+    }
+  }, [isAuthModalOpen]);
+
   if (!isAuthModalOpen) return null;
+
+  const handleClose = () => {
+    resetAllFields();
+    closeAuthModal();
+  };
 
   const handleStudentSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +68,7 @@ export function AuthModal() {
     setIsSubmitting(false);
 
     if (res.success) {
+      resetAllFields();
       if (authIntent === 'orders') setActiveTab('track');
       else if (authIntent === 'profile') setActiveTab('history');
       else setActiveTab('store');
@@ -65,17 +92,13 @@ export function AuthModal() {
     setIsSubmitting(false);
 
     if (res.success) {
+      resetAllFields();
       if (authIntent === 'orders') setActiveTab('track');
       else if (authIntent === 'profile') setActiveTab('history');
       else setActiveTab('store');
     } else {
       setErrorMsg(res.error || 'Registration failed.');
     }
-  };
-
-  const handleDemoStudentFill = () => {
-    setPhone('08012345678');
-    setPin('1234');
   };
 
   return (
@@ -99,7 +122,7 @@ export function AuthModal() {
             </div>
           </div>
           <button
-            onClick={closeAuthModal}
+            onClick={handleClose}
             className="p-1 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             aria-label="Close auth modal"
           >
@@ -107,13 +130,13 @@ export function AuthModal() {
           </button>
         </div>
 
-        {/* Tab Switcher (Strictly Student Sign In and Register - NO ADMIN) */}
+        {/* Tab Switcher */}
         <div className="flex border-b border-[#E2E8DF] text-xs font-bold bg-[#F9FAF8]">
           <button
             type="button"
             onClick={() => {
               setAuthMode('signin');
-              setErrorMsg('');
+              resetAllFields();
             }}
             className={`flex-1 py-3 text-center transition-colors ${
               authMode === 'signin'
@@ -127,7 +150,7 @@ export function AuthModal() {
             type="button"
             onClick={() => {
               setAuthMode('register');
-              setErrorMsg('');
+              resetAllFields();
             }}
             className={`flex-1 py-3 text-center transition-colors ${
               authMode === 'register'
@@ -201,24 +224,17 @@ export function AuthModal() {
                 {isSubmitting ? 'Verifying Account...' : 'Sign In & Access Store'}
               </button>
 
-              <div className="pt-2 text-center">
-                <button
-                  type="button"
-                  onClick={handleDemoStudentFill}
-                  className="text-[11px] text-[#5A635D] hover:text-[#0F2F1D] underline"
-                >
-                  Fill Demo Student (08012345678 / 1234)
-                </button>
-              </div>
-
               <div className="pt-2 border-t border-[#F0F4EF] text-center">
                 <span className="text-xs text-[#5A635D]">New student ordering for first time? </span>
                 <button
                   type="button"
-                  onClick={() => setAuthMode('register')}
+                  onClick={() => {
+                    setAuthMode('register');
+                    resetAllFields();
+                  }}
                   className="text-xs font-bold text-[#0F2F1D] hover:underline"
                 >
-                  Create Profile
+                  Create Student Profile
                 </button>
               </div>
             </form>
@@ -336,7 +352,10 @@ export function AuthModal() {
                 <span className="text-xs text-[#5A635D]">Already have a profile? </span>
                 <button
                   type="button"
-                  onClick={() => setAuthMode('signin')}
+                  onClick={() => {
+                    setAuthMode('signin');
+                    resetAllFields();
+                  }}
                   className="text-xs font-bold text-[#0F2F1D] hover:underline"
                 >
                   Sign In

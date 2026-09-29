@@ -376,63 +376,53 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Query Supabase users table
-      const { data: userRow } = await supabase
+      // Query Supabase users table directly
+      const { data: userRow, error } = await supabase
         .from('users')
         .select('*')
         .eq('phone', cleanPhone)
-        .single();
+        .maybeSingle();
 
-      if (userRow) {
-        if (userRow.pin && userRow.pin !== pin) {
-          return { success: false, error: 'Incorrect PIN. Please try again.' };
-        }
-        const user: AuthUser = {
-          id: userRow.id,
-          name: userRow.name,
-          phone: userRow.phone,
-          hostel: userRow.hostel,
-          room: userRow.room,
-          goal: userRow.goal,
-          role: 'student',
-        };
-        setCurrentUser(user);
-        setIsAdmin(false);
-        setUserProfile({
-          name: user.name,
-          phone: user.phone,
-          hostel: user.hostel || '',
-          room: user.room || '',
-          goal: user.goal || 'muscle',
-        });
-        closeAuthModal();
-        return { success: true };
+      if (error) {
+        return { success: false, error: 'Database connection issue. Please try again.' };
       }
-    } catch {
-      // Fall through to local fallback
-    }
 
-    // Fallback demo student
-    const demoStudent: AuthUser = {
-      id: `usr-${Date.now()}`,
-      name: 'Campus Student',
-      phone: cleanPhone,
-      hostel: 'Hall 4',
-      room: 'Room 102',
-      role: 'student',
-      goal: 'muscle',
-    };
-    setCurrentUser(demoStudent);
-    setIsAdmin(false);
-    setUserProfile({
-      name: demoStudent.name,
-      phone: demoStudent.phone,
-      hostel: demoStudent.hostel || '',
-      room: demoStudent.room || '',
-      goal: demoStudent.goal || 'muscle',
-    });
-    closeAuthModal();
-    return { success: true };
+      if (!userRow) {
+        return {
+          success: false,
+          error: 'No student account found for this phone number. Please click "Register Student Profile" to create your account first.',
+        };
+      }
+
+      if (userRow.pin && userRow.pin !== pin) {
+        return { success: false, error: 'Incorrect 4-digit PIN. Please try again.' };
+      }
+
+      const user: AuthUser = {
+        id: userRow.id,
+        name: userRow.name,
+        phone: userRow.phone,
+        hostel: userRow.hostel,
+        room: userRow.room,
+        goal: userRow.goal || 'muscle',
+        role: 'student',
+      };
+
+      setCurrentUser(user);
+      setIsAdmin(false);
+      setUserProfile({
+        name: user.name,
+        phone: user.phone,
+        hostel: user.hostel || '',
+        room: user.room || '',
+        goal: user.goal || 'muscle',
+      });
+      setActiveTab('store');
+      closeAuthModal();
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Login failed. Please try again.' };
+    }
   };
 
   const registerStudent = async (data: {
@@ -444,23 +434,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     goal?: GoalType;
   }) => {
     const cleanPhone = data.phone.trim().replace(/\s+/g, '');
-    if (!data.name.trim()) return { success: false, error: 'Name is required.' };
-    if (!cleanPhone || cleanPhone.length < 8) return { success: false, error: 'Valid phone is required.' };
-    if (!data.hostel.trim() || !data.room.trim()) return { success: false, error: 'Hostel and room are required.' };
+    if (!data.name.trim()) return { success: false, error: 'Full name is required.' };
+    if (!cleanPhone || cleanPhone.length < 8) return { success: false, error: 'Valid phone number is required.' };
+    if (!data.hostel.trim() || !data.room.trim()) return { success: false, error: 'Hostel and room are required for delivery.' };
     if (!data.pin || data.pin.length < 4) return { success: false, error: 'Create a 4-digit security PIN.' };
 
-    const newUser: AuthUser = {
-      id: `usr-${Date.now()}`,
-      name: data.name.trim(),
-      phone: cleanPhone,
-      hostel: data.hostel.trim(),
-      room: data.room.trim(),
-      role: 'student',
-      goal: data.goal || 'muscle',
-    };
-
-    // Insert to Supabase users table
     try {
+      // Upsert directly into Supabase users table
       const { data: insertedUser, error } = await supabase
         .from('users')
         .upsert(
@@ -478,24 +458,37 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         .select()
         .single();
 
-      if (!error && insertedUser) {
-        newUser.id = insertedUser.id;
+      if (error) {
+        console.error('Supabase registration error:', error);
+        return { success: false, error: error.message || 'Failed to save student profile in database.' };
       }
-    } catch {
-      // Local fallback
-    }
 
-    setCurrentUser(newUser);
-    setIsAdmin(false);
-    setUserProfile({
-      name: newUser.name,
-      phone: newUser.phone,
-      hostel: newUser.hostel || '',
-      room: newUser.room || '',
-      goal: newUser.goal || 'muscle',
-    });
-    closeAuthModal();
-    return { success: true };
+      const newUser: AuthUser = {
+        id: insertedUser.id,
+        name: insertedUser.name,
+        phone: insertedUser.phone,
+        hostel: insertedUser.hostel,
+        room: insertedUser.room,
+        role: 'student',
+        goal: insertedUser.goal || 'muscle',
+      };
+
+      setCurrentUser(newUser);
+      setIsAdmin(false);
+      setUserProfile({
+        name: newUser.name,
+        phone: newUser.phone,
+        hostel: newUser.hostel || '',
+        room: newUser.room || '',
+        goal: newUser.goal || 'muscle',
+      });
+      setActiveTab('store');
+      closeAuthModal();
+      return { success: true };
+    } catch (err: any) {
+      console.error('Registration exception:', err);
+      return { success: false, error: err?.message || 'Database error occurred during registration.' };
+    }
   };
 
   const loginAdmin = async (password: string) => {
@@ -518,8 +511,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setCurrentUser(null);
+    setUserProfile({ name: '', phone: '', hostel: '', room: '', goal: 'muscle' });
     setIsAdmin(false);
     setActiveTab('landing');
+    setCart([]);
+    try {
+      localStorage.removeItem('eleo_current_user');
+      localStorage.removeItem('eleo_cart');
+    } catch {
+      // ignore
+    }
   };
 
   // Cart operations

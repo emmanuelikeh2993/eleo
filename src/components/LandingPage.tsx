@@ -535,11 +535,11 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* SECTION 5: 3-STEP CAMPUS ORDERING WORKFLOW */}
-      <section className="bg-white border border-[#E2E8DF] rounded-3xl p-6 sm:p-10 shadow-sm space-y-8">
+      {/* SECTION 5: 3-STEP CAMPUS ORDERING WORKFLOW / WHAT WE DO */}
+      <section id="what-we-do" className="bg-white border border-[#E2E8DF] rounded-3xl p-6 sm:p-10 shadow-sm space-y-8 scroll-mt-24">
         <div className="text-center max-w-xl mx-auto space-y-2">
           <span className="text-xs font-bold uppercase tracking-wider text-[#15803D]">
-            Simple 3-Step Process
+            What We Do
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F2F1D] tracking-tight">
             How Campus Egg Delivery Works
