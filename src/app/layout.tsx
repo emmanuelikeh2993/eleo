@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { StoreProvider } from '@/lib/store';
+import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -39,7 +40,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className="font-sans min-h-screen bg-[#F9FAF8] text-[#1C201D] flex flex-col">
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <ServiceWorkerRegister />
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );

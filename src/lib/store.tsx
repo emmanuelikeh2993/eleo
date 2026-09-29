@@ -94,10 +94,14 @@ interface StoreContextType {
   activeTab: AppTab;
   isAuthModalOpen: boolean;
   authIntent: 'order' | 'orders' | 'profile' | 'admin' | null;
+  authInitialMode: 'signin' | 'register' | 'forgot';
 
   // Actions
   setActiveTab: (tab: AppTab) => void;
-  openAuthModal: (intent?: 'order' | 'orders' | 'profile' | 'admin') => void;
+  openAuthModal: (
+    intent?: 'order' | 'orders' | 'profile' | 'admin',
+    initialMode?: 'signin' | 'register' | 'forgot'
+  ) => void;
   closeAuthModal: () => void;
   loginStudent: (phone: string, pin: string) => Promise<{ success: boolean; error?: string }>;
   registerStudent: (data: {
@@ -108,6 +112,7 @@ interface StoreContextType {
     pin: string;
     goal?: GoalType;
   }) => Promise<{ success: boolean; error?: string }>;
+  resetStudentPin: (phone: string, room: string, newPin: string) => Promise<{ success: boolean; error?: string }>;
   loginAdmin: (password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 
@@ -151,6 +156,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [activeTab, setActiveTab] = useState<AppTab>('landing');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authIntent, setAuthIntent] = useState<'order' | 'orders' | 'profile' | 'admin' | null>(null);
+  const [authInitialMode, setAuthInitialMode] = useState<'signin' | 'register' | 'forgot'>('signin');
   const [isHydrated, setIsHydrated] = useState(false);
 
   // 1. Initial Load & Hydration
@@ -356,8 +362,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [cart, currentUser, orders, activeOrderId, isHydrated]);
 
   // Auth actions
-  const openAuthModal = (intent: 'order' | 'orders' | 'profile' | 'admin' = 'order') => {
+  const openAuthModal = (
+    intent: 'order' | 'orders' | 'profile' | 'admin' = 'order',
+    initialMode: 'signin' | 'register' | 'forgot' = 'signin'
+  ) => {
     setAuthIntent(intent);
+    setAuthInitialMode(initialMode);
     setIsAuthModalOpen(true);
   };
 
@@ -491,6 +501,56 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resetStudentPin = async (phone: string, room: string, newPin: string) => {
+    const cleanPhone = phone.trim().replace(/\s+/g, '');
+    if (!cleanPhone || cleanPhone.length < 8) {
+      return { success: false, error: 'Please enter a valid phone number.' };
+    }
+    if (!room.trim()) {
+      return { success: false, error: 'Please enter your registered hostel room.' };
+    }
+    if (!newPin || newPin.length < 4) {
+      return { success: false, error: 'New PIN must be at least 4 digits.' };
+    }
+
+    try {
+      const { data: userRow, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('phone', cleanPhone)
+        .maybeSingle();
+
+      if (error || !userRow) {
+        return { success: false, error: 'No student account found with this phone number.' };
+      }
+
+      // Check room match (case-insensitive substring comparison)
+      const inputRoom = room.trim().toLowerCase().replace(/room\s*/g, '');
+      const savedRoom = (userRow.room || '').trim().toLowerCase().replace(/room\s*/g, '');
+
+      if (!savedRoom.includes(inputRoom) && !inputRoom.includes(savedRoom)) {
+        return {
+          success: false,
+          error: 'Verification failed: Room number does not match account records. If you cannot remember your details, contact dispatch on WhatsApp.',
+        };
+      }
+
+      // Update PIN in Supabase
+      const { error: updateErr } = await supabase
+        .from('users')
+        .update({ pin: newPin, updated_at: new Date().toISOString() })
+        .eq('id', userRow.id);
+
+      if (updateErr) {
+        return { success: false, error: 'Failed to update PIN in database. Please try again.' };
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Password reset failed.' };
+    }
+  };
+
   const loginAdmin = async (password: string) => {
     if (password === 'admin123' || password === 'eleo2026') {
       const adminUser: AuthUser = {
@@ -586,9 +646,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const delivery_fee = fulfillment_method === 'delivery' ? settings.delivery_fee : 0;
     const total = subtotal + delivery_fee;
 
+    const hostel = userProfile.hostel || currentUser?.hostel || 'Hostel';
+    const room = userProfile.room || currentUser?.room || '';
     const delivery_location =
       fulfillment_method === 'delivery'
-        ? `${userProfile.hostel}, Room ${userProfile.room}`
+        ? `${hostel}, Room ${room}`
         : 'ELEO Campus Depot Pickup Point';
 
     // Insert to Supabase Orders Table
@@ -597,8 +659,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         .from('orders')
         .insert([
           {
-            customer_name: userProfile.name,
-            customer_phone: userProfile.phone,
+            user_id: currentUser?.id && !currentUser.id.startsWith('usr-') ? currentUser.id : null,
+            customer_name: userProfile.name || currentUser?.name || 'Student',
+            customer_phone: userProfile.phone || currentUser?.phone || '',
             subtotal,
             delivery_fee,
             total,
@@ -822,11 +885,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         activeTab,
         isAuthModalOpen,
         authIntent,
+        authInitialMode,
         setActiveTab,
         openAuthModal,
         closeAuthModal,
         loginStudent,
         registerStudent,
+        resetStudentPin,
         loginAdmin,
         logout,
         addToCart,

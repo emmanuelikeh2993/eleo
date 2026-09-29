@@ -236,10 +236,16 @@ export function LandingPage() {
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
-                  onClick={() => openAuthModal('order')}
+                  onClick={() => openAuthModal('order', 'signin')}
+                  className="flex-1 sm:flex-initial px-3.5 py-2 bg-[#F0FDF4] border border-[#BBF7D0] text-[#15803D] font-bold rounded-xl text-xs hover:bg-[#DCFCE7] transition-all text-center active:scale-95"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => openAuthModal('order', 'register')}
                   className="flex-1 sm:flex-initial px-4 py-2 bg-[#0F2F1D] text-white font-bold rounded-xl text-xs hover:bg-[#1B4329] transition-all shadow-sm text-center active:scale-95"
                 >
-                  Sign In / Register
+                  Sign Up
                 </button>
               </div>
             </div>

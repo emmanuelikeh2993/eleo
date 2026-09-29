@@ -211,14 +211,14 @@ export function Header({ onOpenCart }: HeaderProps) {
               /* GUEST ACTION BAR: Sign In & Register */
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => openAuthModal('order')}
+                  onClick={() => openAuthModal('order', 'signin')}
                   className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 transition-colors border border-white/20"
                 >
                   <LogIn className="w-3.5 h-3.5 text-[#86EFAC]" />
                   <span>Sign In</span>
                 </button>
                 <button
-                  onClick={() => openAuthModal('order')}
+                  onClick={() => openAuthModal('order', 'register')}
                   className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#15803D] hover:bg-[#166534] text-white flex items-center gap-1.5 transition-colors shadow-sm"
                 >
                   <span>Sign Up</span>
@@ -229,9 +229,9 @@ export function Header({ onOpenCart }: HeaderProps) {
         </div>
 
         {/* Mobile Navigation Row (visible on mobile screens only) */}
-        <nav className="md:hidden flex items-center justify-between border-t border-[#1B4329] mt-3 pt-2 text-xs font-medium text-[#C2D8C9] overflow-x-auto gap-2">
+        <nav className="md:hidden flex items-center justify-start border-t border-[#1B4329] mt-3 pt-2 text-xs font-medium text-[#C2D8C9] overflow-x-auto gap-4">
           {!currentUser ? (
-            /* GUEST MOBILE NAVIGATION */
+            /* GUEST MOBILE NAVIGATION: Clean Home & What We Do */
             <>
               <button
                 onClick={() => {
@@ -257,13 +257,6 @@ export function Header({ onOpenCart }: HeaderProps) {
                 className="flex items-center gap-1 px-3 py-1 rounded-md shrink-0 transition-colors text-[#C2D8C9] hover:text-white"
               >
                 <span>What We Do</span>
-              </button>
-              <button
-                onClick={() => openAuthModal('order')}
-                className="flex items-center gap-1 px-3 py-1 rounded-md shrink-0 transition-colors bg-[#15803D] text-white font-bold ml-auto"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Sign In / Sign Up</span>
               </button>
             </>
           ) : (

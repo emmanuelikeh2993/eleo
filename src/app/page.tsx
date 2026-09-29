@@ -172,12 +172,20 @@ export default function HomePage() {
                     <span>Please sign in or set up your hostel room profile before adding crates to cart.</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => openAuthModal('order')}
-                  className="px-4 py-2 bg-[#78350F] hover:bg-[#92400E] text-white font-bold rounded-xl text-xs transition-colors self-start sm:self-auto shrink-0"
-                >
-                  Sign In / Register
-                </button>
+                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                  <button
+                    onClick={() => openAuthModal('order', 'signin')}
+                    className="px-3.5 py-2 bg-white border border-[#FDE68A] hover:bg-[#FEF9C3] text-[#78350F] font-bold rounded-xl text-xs transition-colors"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => openAuthModal('order', 'register')}
+                    className="px-4 py-2 bg-[#78350F] hover:bg-[#92400E] text-white font-bold rounded-xl text-xs transition-colors shadow-xs"
+                  >
+                    Sign Up
+                  </button>
+                </div>
               </div>
             )}
 
